@@ -1,0 +1,14 @@
+- name: Configure server
+  hosts: hosts
+  gather_facts: true
+  become: true
+
+  vars_files:
+    - ../vars/main.yml
+
+  roles:
+    - ssh
+    - firewall
+    - auditd
+    - updates
+    - docker

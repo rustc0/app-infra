@@ -1,0 +1,8 @@
+# Users added to the docker group (root-equivalent access). Set [] to disable.
+docker_users:
+  - "{{ ansible_user }}"
+
+docker_app_owner: "{{ ansible_user }}"
+docker_app_dirs:
+  - /opt/app
+  - /opt/app/data

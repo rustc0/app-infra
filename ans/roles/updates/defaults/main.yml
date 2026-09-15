@@ -1,0 +1,3 @@
+updates_auto_reboot: false
+updates_reboot_time: "04:00"
+updates_remove_unused_dependencies: true

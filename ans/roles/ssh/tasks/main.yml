@@ -1,0 +1,15 @@
+# Debian's sshd_config includes sshd_config.d/*.conf first, and sshd uses the
+# first value it sees, so a 00- drop-in takes precedence over the main file.
+- name: Deploy SSH hardening drop-in
+  ansible.builtin.template:
+    src: 00-hardening.conf.j2
+    dest: /etc/ssh/sshd_config.d/00-hardening.conf
+    owner: root
+    group: root
+    mode: "0644"
+    validate: /usr/sbin/sshd -t -f %s
+  notify: Restart ssh
+
+- name: Validate full SSH configuration
+  ansible.builtin.command: /usr/sbin/sshd -t
+  changed_when: false

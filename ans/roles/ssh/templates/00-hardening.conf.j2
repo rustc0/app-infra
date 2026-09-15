@@ -1,0 +1,9 @@
+# {{ ansible_managed }}
+PermitRootLogin no
+PasswordAuthentication no
+KbdInteractiveAuthentication no
+PermitEmptyPasswords no
+PubkeyAuthentication yes
+MaxAuthTries {{ ssh_max_auth_tries }}
+LoginGraceTime {{ ssh_login_grace_time }}
+X11Forwarding no

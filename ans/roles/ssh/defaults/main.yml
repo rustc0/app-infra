@@ -1,0 +1,2 @@
+ssh_max_auth_tries: 3
+ssh_login_grace_time: 30

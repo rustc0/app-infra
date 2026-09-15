@@ -1,0 +1,9 @@
+# Source allowed to reach SSH. "any" or a CIDR such as "203.0.113.10/32".
+firewall_ssh_allowed_from: any
+firewall_ssh_port: 22
+
+# Note: ports published by Docker (-p) bypass UFW because Docker writes its
+# own iptables rules. Bind containers to 127.0.0.1 or front them with a proxy.
+firewall_allowed_tcp_ports:
+  - 80
+  - 443

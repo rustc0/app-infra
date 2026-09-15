@@ -1,0 +1,12 @@
+auditd_watches:
+  - { path: /etc/ssh/sshd_config, key: sshd }
+  - { path: /etc/ssh/sshd_config.d/, key: sshd }
+  - { path: /etc/sudoers, key: sudoers }
+  - { path: /etc/sudoers.d/, key: sudoers }
+  - { path: /etc/passwd, key: identity }
+  - { path: /etc/group, key: identity }
+  - { path: /etc/shadow, key: identity }
+  - { path: /etc/gshadow, key: identity }
+
+# Additional watches in the same { path, key } form.
+auditd_extra_watches: []

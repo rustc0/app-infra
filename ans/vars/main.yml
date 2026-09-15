@@ -1,0 +1,20 @@
+# ssh
+ssh_max_auth_tries: 3
+
+# firewall
+firewall_ssh_allowed_from: any # restrict to your IP, e.g. "203.0.113.10/32"
+firewall_allowed_tcp_ports:
+  - 80
+  - 443
+
+# updates
+updates_auto_reboot: false
+updates_reboot_time: "04:00"
+
+# docker
+docker_users:
+  - admin
+docker_app_owner: admin
+docker_app_dirs:
+  - /opt/app
+  - /opt/app/data
