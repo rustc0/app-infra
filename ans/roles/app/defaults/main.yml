@@ -1,0 +1,25 @@
+# Where the deploy artifacts land. The directory itself is created by the
+# `docker` role (docker_app_dirs), not here.
+app_dir: /opt/app
+app_user: "{{ ansible_user }}"
+
+# Images are built by CI and pulled from here; the server never builds.
+app_registry: ghcr.io/rustc0
+# Pin to a commit sha for a reproducible deploy. Rolling back = set the old sha.
+app_image_tag: latest
+app_registry_username: rustc0
+
+# Published by the gateway container. Must stay in sync with
+# firewall_allowed_tcp_ports and the AWS security group.
+app_http_port: 80
+app_https_port: 443
+
+app_postgres_user: chatapp
+app_postgres_db: chatapp
+
+# No defaults on purpose — these are secrets and must come from the vault.
+# The assert in tasks/main.yml fails the play rather than deploying a stack
+# with an empty password or a predictable JWT signing key.
+app_registry_token: ""
+app_postgres_password: ""
+app_jwt_secret: ""

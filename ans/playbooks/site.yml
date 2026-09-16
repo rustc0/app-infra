@@ -5,6 +5,7 @@
 
   vars_files:
     - ../vars/main.yml
+    - ../secrets/vault.yml
 
   roles:
     - ssh
@@ -12,3 +13,4 @@
     - auditd
     - updates
     - docker
+    - app

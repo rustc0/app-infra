@@ -1,0 +1,53 @@
+- name: Require secrets to be supplied
+  ansible.builtin.assert:
+    that:
+      - app_registry_token | length > 0
+      - app_postgres_password | length > 0
+      - app_jwt_secret | length > 0
+    fail_msg: >-
+      app_registry_token, app_postgres_password and app_jwt_secret must be set,
+      normally from secrets/vault.yml. Refusing to deploy with empty secrets.
+    quiet: true
+
+# Everything below runs as the app user rather than root: it is the account in
+# the docker group (see the docker role), so a later manual `docker compose` on
+# the box sees the same registry credentials and the same compose project.
+- name: Authenticate to the container registry
+  ansible.builtin.command:
+    cmd: docker login {{ app_registry | split('/') | first }} --username {{ app_registry_username }} --password-stdin
+    stdin: "{{ app_registry_token }}"
+  become_user: "{{ app_user }}"
+  # Writes ~/.docker/config.json. Cheap and safe to repeat, and it reports no
+  # useful change state, so don't let it mark the play changed every run.
+  changed_when: false
+  no_log: true
+
+- name: Deploy environment file
+  ansible.builtin.template:
+    src: env.j2
+    dest: "{{ app_dir }}/.env"
+    owner: "{{ app_user }}"
+    group: "{{ app_user }}"
+    # Holds the database password and the JWT signing key.
+    mode: "0600"
+
+- name: Deploy compose file
+  ansible.builtin.template:
+    src: compose.yml.j2
+    dest: "{{ app_dir }}/compose.yml"
+    owner: "{{ app_user }}"
+    group: "{{ app_user }}"
+    mode: "0640"
+
+# No handler needed: `docker compose up -d` labels each container with a hash of
+# its resolved config, so a changed .env or compose.yml recreates the affected
+# containers on its own, and an unchanged one is a no-op.
+- name: Bring the application stack up
+  community.docker.docker_compose_v2:
+    project_src: "{{ app_dir }}"
+    files:
+      - compose.yml
+    pull: always
+    remove_orphans: true
+    state: present
+  become_user: "{{ app_user }}"
