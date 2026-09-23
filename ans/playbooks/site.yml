@@ -8,9 +8,20 @@
     - ../secrets/vault.yml
 
   roles:
-    - ssh
-    - firewall
-    - auditd
-    - updates
-    - docker
-    - app
+    - role: ssh
+      tags: ssh
+
+    - role: firewall
+      tags: firewall
+
+    - role: auditd
+      tags: auditd
+
+    - role: updates
+      tags: updates
+
+    - role: docker
+      tags: docker
+
+    - role: app
+      tags: app

@@ -90,18 +90,22 @@ Makefile `cd`s there for you.
 
 ### First run only
 
-The `app` role needs three secrets, and refuses to touch the host without them.
-Create `ans/secrets/vault.yml` holding `vault_postgres_password`, `vault_jwt_secret`
-and `vault_ghcr_token` (a GitHub PAT with `read:packages` and nothing else — the
-server only pulls), then:
+The `app` role needs two secrets, and refuses to touch the host without them.
+Create `ans/secrets/vault.yml` holding `vault_postgres_password` and
+`vault_jwt_secret`, then:
 
 ```bash
 ansible-vault encrypt ans/secrets/vault.yml
 ```
 
-Generate the first two rather than copying them from anywhere:
-`openssl rand -base64 32`. In particular do not reuse the `JWT_SECRET` from
-`chatApp/.env.example` — that is a real-looking key sitting in a public repo.
+Generate both rather than copying them from anywhere: `openssl rand -base64 32`.
+In particular do not reuse the `JWT_SECRET` from `chatApp/.env.example` — that is
+a real-looking key sitting in a public repo.
+
+No registry credential is needed. The `chatapp-{backend,frontend,gateway}`
+packages are public, so the server pulls anonymously and the role has no
+`docker login` step at all. Making them private would mean restoring that step
+and storing a GitHub PAT (classic, `read:packages`, nothing else) in the vault.
 
 ### The Ansible side
 
@@ -112,7 +116,7 @@ Generate the first two rather than copying them from anywhere:
 | `ans/vars/main.yml` | Per-deployment overrides, loaded by the playbook |
 | `ans/playbooks/site.yml` | The entry point — runs every role, as root, against `hosts` |
 | `ans/roles/` | One role per concern (below) |
-| `ans/secrets/` | Git-ignored. Holds `vault.yml`: DB password, JWT key, GHCR token |
+| `ans/secrets/` | Git-ignored. Holds `vault.yml`: DB password and JWT key |
 | `ans/requirements.yml` | Galaxy collections: `community.general` (`ufw`), `community.docker` (`docker_compose_v2`) |
 
 Role defaults (`ans/roles/*/defaults/main.yml`) are written so the playbook runs
@@ -206,7 +210,8 @@ terminates TLS).
 
 The server builds nothing. Images are built by GitHub Actions in the chatApp
 repo and pushed to `ghcr.io/rustc0/chatapp-{backend,frontend,gateway}`; this role
-logs in to GHCR, renders two files, and runs `docker compose up -d`. The entire
+renders two files and runs `docker compose up -d`. Those packages are public, so
+the pull is anonymous and the role stores no registry credential. The entire
 deployed footprint is:
 
 ```
@@ -288,8 +293,10 @@ Re-running the playbook unchanged should report `changed=0` for the `app` role.
       `firewall_ssh_allowed_from: any` in `ans/vars/main.yml` and
       `ssh_allowed_cidr = "0.0.0.0/0"` in `tf/terraform.tfvars`. Key-only auth and `MaxAuthTries 3` mean this is
       noisy rather than dangerous, but both want your own CIDR.
-- [ ] **Rotate the GHCR PAT on a schedule,** or drop the long-lived token
-      entirely by moving the images to ECR and pulling with an IAM instance role.
+- [ ] **Private images.** The GHCR packages are public, which is why the server
+      needs no registry credential at all. Making them private means a long-lived
+      PAT in the vault and a rotation schedule — or moving to ECR and pulling with
+      an IAM instance role, which needs no stored secret either.
 
 **Operations**
 

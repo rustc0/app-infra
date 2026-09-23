@@ -25,11 +25,9 @@ app_registry: ghcr.io/rustc0
 # Bump to the commit sha CI published, then re-run the playbook to deploy.
 # Rolling back is the same command with the previous sha.
 app_image_tag: latest
-app_registry_username: rustc0
 app_postgres_user: chatapp
 app_postgres_db: chatapp
 
 # Secrets come from secrets/vault.yml, which is git-ignored and vault-encrypted.
-app_registry_token: "{{ vault_ghcr_token }}"
 app_postgres_password: "{{ vault_postgres_password }}"
 app_jwt_secret: "{{ vault_jwt_secret }}"

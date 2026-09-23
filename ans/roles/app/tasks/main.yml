@@ -1,26 +1,19 @@
 - name: Require secrets to be supplied
   ansible.builtin.assert:
     that:
-      - app_registry_token | length > 0
       - app_postgres_password | length > 0
       - app_jwt_secret | length > 0
     fail_msg: >-
-      app_registry_token, app_postgres_password and app_jwt_secret must be set,
-      normally from secrets/vault.yml. Refusing to deploy with empty secrets.
+      app_postgres_password and app_jwt_secret must be set, normally from
+      secrets/vault.yml. Refusing to deploy with empty secrets.
     quiet: true
 
-# Everything below runs as the app user rather than root: it is the account in
-# the docker group (see the docker role), so a later manual `docker compose` on
-# the box sees the same registry credentials and the same compose project.
-- name: Authenticate to the container registry
-  ansible.builtin.command:
-    cmd: docker login {{ app_registry | split('/') | first }} --username {{ app_registry_username }} --password-stdin
-    stdin: "{{ app_registry_token }}"
-  become_user: "{{ app_user }}"
-  # Writes ~/.docker/config.json. Cheap and safe to repeat, and it reports no
-  # useful change state, so don't let it mark the play changed every run.
-  changed_when: false
-  no_log: true
+# The compose tasks below run as the app user rather than root: it is the
+# account in the docker group (see the docker role), so a later manual
+# `docker compose` on the box sees the same project and the same state.
+#
+# There is no `docker login` here. The chatapp packages on GHCR are public, so
+# the server pulls anonymously and needs no registry credential at all.
 
 - name: Deploy environment file
   ansible.builtin.template:

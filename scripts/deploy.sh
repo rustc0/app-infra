@@ -22,8 +22,8 @@ done
 
 if [[ ! -f "$ans_dir/secrets/vault.yml" ]]; then
 	echo "error: $ans_dir/secrets/vault.yml is missing." >&2
-	echo "       The app role needs vault_postgres_password, vault_jwt_secret and" >&2
-	echo "       vault_ghcr_token. See 'First run only' in README.md." >&2
+	echo "       The app role needs vault_postgres_password and vault_jwt_secret." >&2
+	echo "       See 'First run only' in README.md." >&2
 	exit 1
 fi
 
